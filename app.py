@@ -4,6 +4,12 @@ import re, io, zipfile, uuid
 from rapidfuzz import process, fuzz
 from PIL import Image
 
+# ===== NETWORK ERROR FIX =====
+# ये दो lines सिर्फ Network Error के लिए जोड़ी हैं
+import os
+os.environ['STREAMLIT_SERVER_ENABLE_XSRF_PROTECTION'] = 'false'
+os.environ['STREAMLIT_SERVER_ENABLE_CORS'] = 'false'
+
 # ================= CONFIG =================
 DEFAULT_MATCH = 80
 DEFAULT_CHECK = 65
@@ -146,6 +152,7 @@ if uploaded_excel and uploaded_images:
 
         st.markdown(f"### {title}")
 
+        # --- BULK ACTIONS FOR CHECK SECTION ---
         bulk_list = []
         if key == "CHECK":
             bc1, bc2 = st.columns(2)
@@ -172,6 +179,7 @@ if uploaded_excel and uploaded_images:
                     )
                     st.progress(item["score"] / 100)
 
+                    # Individual actions
                     if st.button("✅ Confirm", key=f"{key}_conf_{uid}"):
                         st.session_state.results["MATCH"].append(item)
                         st.session_state.results[key].remove(item)
@@ -181,10 +189,12 @@ if uploaded_excel and uploaded_images:
                         st.session_state.results[key].remove(item)
                         st.rerun()
 
+                    # Add to bulk list if checkboxes are ticked
                     if key == "CHECK":
                         if sel_confirm or sel_remove:
                             bulk_list.append(item)
 
+        # --- BULK BUTTONS ---
         if key == "CHECK" and bulk_list:
             st.divider()
             if sel_confirm:
